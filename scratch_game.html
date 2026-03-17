@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Game Scratch</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,Arial;
+}
+
+body{
+height:100vh;
+background:linear-gradient(135deg,#0f172a,#020617);
+color:white;
+display:flex;
+}
+
+/* LAYOUT */
+
+.container{
+display:grid;
+grid-template-columns:9fr 3fr;
+width:100%;
+}
+
+/* COLUMN 1 */
+
+.game-area{
+display:flex;
+justify-content:center;
+align-items:center;
+position:relative;
+}
+
+.background{
+position:relative;
+padding:20px;
+background:#020617;
+border-radius:12px;
+box-shadow:0 0 30px rgba(0,0,0,0.7);
+}
+
+.background img{
+max-width:100%;
+border-radius:10px;
+}
+
+/* CARD */
+
+.card{
+width:180px;
+height:60px;
+position:absolute;
+perspective:1000px;
+cursor:pointer;
+}
+
+.card-inner{
+width:100%;
+height:100%;
+position:relative;
+transition:transform 0.8s;
+transform-style:preserve-3d;
+}
+
+.card.flipped .card-inner{
+transform:rotateY(180deg);
+}
+
+.card-face{
+width:100%;
+height:100%;
+border-radius:10px;
+position:absolute;
+backface-visibility:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+font-weight:bold;
+}
+
+.card-front{
+background:linear-gradient(135deg,#6366f1,#9333ea);
+font-size:26px;
+}
+
+.card-back{
+background:linear-gradient(135deg,#14b8a6,#0ea5e9);
+transform:rotateY(180deg);
+font-size:16px;
+text-align:center;
+padding:8px;
+}
+
+/* COLUMN 2 */
+
+.panel{
+padding:30px;
+background:#020617;
+border-left:2px solid #1e293b;
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
+.title{
+font-size:26px;
+font-weight:bold;
+}
+
+.command{
+font-size:20px;
+line-height:1.5;
+}
+.command b{
+font-size: 120%;
+background: linear-gradient(135deg,#6366f1,#9333ea);
+display: inline-block;
+border-radius: 0.25em;
+padding: 0.1em 0.5em;
+}
+
+.score{
+font-size:22px;
+color:#38bdf8;
+}
+.score span {
+	font-weight: bold;
+	font-size: 130%;
+	color: red;
+}
+
+.result{
+font-size:20px;
+margin-top:10px;
+}
+
+/* HEART EFFECT */
+
+.heart{
+position:fixed;
+bottom:-30px;
+font-size:24px;
+animation:floatUp 4s linear forwards;
+}
+
+@keyframes floatUp{
+0%{transform:translateY(0);opacity:1}
+100%{transform:translateY(-100vh);opacity:0}
+}
+
+/* CARD POSITIONS */
+
+#card1{top:5px;left:0%;}
+#card2{top:5px;left:20%;}
+#card3{top:5px;left:38%;}
+#card4{top:5px;left:55%;}
+#card5{top:40px;left:70%;}
+#card6{top:5px;right:0%;}
+#card7{bottom:0;left:8%;}
+#card8{bottom:0;left:33.3%;}
+#card9{bottom:0;left:69.3%;}
+
+.timer{
+font-size:22px;
+color:#facc15;
+font-weight:bold;
+}
+
+#startBtn{
+padding:12px;
+font-size:18px;
+font-weight:bold;
+background:linear-gradient(135deg,#22c55e,#16a34a);
+border:none;
+border-radius:8px;
+color:white;
+cursor:pointer;
+transition:0.2s;
+}
+
+#startBtn:hover{
+transform:scale(1.05);
+box-shadow:0 0 10px #22c55e;
+}
+
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- COLUMN 1 -->
+
+<div class="game-area">
+
+<div class="background">
+
+<img src="scratch.jpg">
+
+<div class="card" id="card1"><div class="card-inner"><div class="card-face card-front">1</div><div class="card-face card-back">Nút chọn ngôn ngữ</div></div></div>
+<div class="card" id="card2"><div class="card-inner"><div class="card-face card-front">2</div><div class="card-face card-back">Bảng chọn</div></div></div>
+<div class="card" id="card3"><div class="card-inner"><div class="card-face card-front">3</div><div class="card-face card-back">Cờ xanh</div></div></div>
+<div class="card" id="card4"><div class="card-inner"><div class="card-face card-front">4</div><div class="card-face card-back">Nút dừng</div></div></div>
+<div class="card" id="card5"><div class="card-inner"><div class="card-face card-front">5</div><div class="card-face card-back">Nhân vật</div></div></div>
+<div class="card" id="card6"><div class="card-inner"><div class="card-face card-front">6</div><div class="card-face card-back">Sân khấu</div></div></div>
+<div class="card" id="card7"><div class="card-inner"><div class="card-face card-front">7</div><div class="card-face card-back">Khu vực lệnh</div></div></div>
+<div class="card" id="card8"><div class="card-inner"><div class="card-face card-front">8</div><div class="card-face card-back">Khu vực lập trình</div></div></div>
+<div class="card" id="card9"><div class="card-inner"><div class="card-face card-front">9</div><div class="card-face card-back">Tạo nhân vật, sân khấu</div></div></div>
+
+</div>
+
+</div>
+
+<!-- COLUMN 2 -->
+
+<div class="panel">
+
+<div class="title">🎮 Game học Scratch</div>
+
+<button id="startBtn">▶ Bắt đầu</button>
+
+<div class="command" id="command"></div>
+
+<div class="timer">⏱ Thời gian: <span id="timer">15</span>s</div>
+
+<div class="score">Điểm: <span id="score">0</span></div>
+
+<div class="result" id="result"></div>
+
+</div>
+
+</div>
+
+<script>const commands=[
+{card:"card1",text:"Nút lệnh chọn ngôn ngữ"},
+{card:"card2",text:"Bảng chọn"},
+{card:"card3",text:"Nút lệnh cờ xanh"},
+{card:"card4",text:"Nút dừng chương trình"},
+{card:"card5",text:"Nhân vật"},
+{card:"card6",text:"Sân khấu"},
+{card:"card7",text:"Khu vực lệnh"},
+{card:"card8",text:"Khu vực lập trình"},
+{card:"card9",text:"Khu vực tạo nhân vật, sân khấu"}
+]
+
+/* RANDOM ORDER */
+
+function shuffle(array) {
+
+  for (let i = array.length - 1; i > 0; i--) {
+
+    let j = Math.floor(Math.random() * (i + 1));
+
+    let temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+
+  }
+
+}
+
+shuffle(commands)
+
+/* GAME STATE */
+
+let index=0
+let score=0
+let timeLeft=25
+let timerInterval=null
+let gameStarted=false
+
+const commandText=document.getElementById("command")
+const scoreText=document.getElementById("score")
+const result=document.getElementById("result")
+const timerText=document.getElementById("timer")
+
+/* TIMER */
+
+function startTimer(){
+
+timeLeft=15
+timerText.innerText=timeLeft
+
+timerInterval=setInterval(()=>{
+
+timeLeft--
+timerText.innerText=timeLeft
+
+if(timeLeft<=0){
+
+clearInterval(timerInterval)
+
+index++
+
+setTimeout(nextCommand,300)
+
+}
+
+},1000)
+
+}
+
+// Thêm xử lý nút Start
+
+const startBtn=document.getElementById("startBtn")
+
+startBtn.addEventListener("click",()=>{
+
+if(gameStarted) return
+
+gameStarted=true
+
+startBtn.style.display="none"
+
+nextCommand()
+
+})
+
+// Chặn click khi chưa Start
+
+document.querySelectorAll(".card").forEach(card=>{
+
+card.addEventListener("click",()=>{
+
+if(!gameStarted) return
+
+if(card.classList.contains("done")) return
+
+clearInterval(timerInterval)
+
+card.classList.add("flipped")
+card.classList.add("done")
+
+if(card.id===commands[index].card){
+score+=10
+}
+
+scoreText.innerText=score
+
+index++
+
+setTimeout(nextCommand,800)
+
+})
+
+})
+
+/* NEXT QUESTION */
+
+function nextCommand(){
+
+if(index>=commands.length){
+finishGame()
+return
+}
+
+commandText.innerHTML=
+`Hãy nháy chuột vào vị trí <b>"${commands[index].text}"</b>`
+
+startTimer()
+
+}
+
+/* FINISH */
+
+function finishGame(){
+
+commandText.innerHTML="🎉 Chúc mừng bạn đã hoàn thành trò chơi!"
+result.innerHTML="Điểm của bạn: "+score
+
+if(score>=80){
+
+result.innerHTML+="<br>🌟 Xuất sắc! Bạn hiểu Scratch rất tốt!"
+setInterval(createHeart,300)
+
+}else if(score>=50){
+
+result.innerHTML+="<br>👍 Rất tốt! Bạn đã nắm được nhiều kiến thức."
+
+}else{
+
+result.innerHTML+="<br>💪 Hãy cố gắng thêm nhé!"
+
+}
+
+}
+
+/* HEART EFFECT */
+
+function createHeart(){
+
+const heart=document.createElement("div")
+heart.className="heart"
+heart.innerHTML=["❤️","😊","💖"][Math.floor(Math.random()*3)]
+heart.style.left=Math.random()*100+"vw"
+
+document.body.appendChild(heart)
+
+setTimeout(()=>heart.remove(),4000)
+
+}
+
+/* CLICK */
+
+document.querySelectorAll(".card").forEach(card=>{
+
+card.addEventListener("click",()=>{
+
+if(card.classList.contains("done")) return
+
+clearInterval(timerInterval)
+
+card.classList.add("flipped")
+card.classList.add("done")
+
+if(card.id===commands[index].card){
+score+=10
+}
+
+scoreText.innerText=score
+
+index++
+
+setTimeout(nextCommand,800)
+
+})
+
+})
+
+// nextCommand()
+</script>
+
+</body>
+</html>
