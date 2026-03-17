@@ -97,6 +97,14 @@ text-align:center;
 padding:8px;
 }
 
+.card.wrong .card-back{
+background:#ef4444;
+}
+
+.card.skip .card-back{
+background:#ef4444;
+}
+
 /* COLUMN 2 */
 
 .panel{
@@ -171,6 +179,10 @@ font-size:22px;
 color:#facc15;
 font-weight:bold;
 }
+.timer span{
+  font-size: 120%;
+  color: red;
+}
 
 #startBtn{
 padding:12px;
@@ -187,6 +199,29 @@ transition:0.2s;
 #startBtn:hover{
 transform:scale(1.05);
 box-shadow:0 0 10px #22c55e;
+}
+
+#skipBtn{
+padding:10px;
+font-size:16px;
+font-weight:bold;
+background:linear-gradient(135deg,#f97316,#ea580c);
+border:none;
+border-radius:8px;
+color:white;
+cursor:pointer;
+}
+
+#restartBtn{
+padding:10px;
+font-size:16px;
+font-weight:bold;
+background:linear-gradient(135deg,#3b82f6,#2563eb);
+border:none;
+border-radius:8px;
+color:white;
+cursor:pointer;
+display:none;
 }
 
 
@@ -229,21 +264,26 @@ box-shadow:0 0 10px #22c55e;
 
 <div class="command" id="command"></div>
 
-<div class="timer">⏱ Thời gian: <span id="timer">15</span>s</div>
+<div class="timer">⏱ Thời gian còn lại: <span id="timer">15</span>giây</div>
+
+<button id="skipBtn">⏭ Bỏ qua</button>
 
 <div class="score">Điểm: <span id="score">0</span></div>
 
 <div class="result" id="result"></div>
 
-</div>
+<button id="restartBtn">🔄 Chơi lại</button>
 
 </div>
 
-<script>const commands=[
+</div>
+
+<script>
+const commands=[
 {card:"card1",text:"Nút lệnh chọn ngôn ngữ"},
 {card:"card2",text:"Bảng chọn"},
 {card:"card3",text:"Nút lệnh cờ xanh"},
-{card:"card4",text:"Nút dừng chương trình"},
+{card:"card4",text:"Nút lệnh dừng chương trình"},
 {card:"card5",text:"Nhân vật"},
 {card:"card6",text:"Sân khấu"},
 {card:"card7",text:"Khu vực lệnh"},
@@ -251,36 +291,45 @@ box-shadow:0 0 10px #22c55e;
 {card:"card9",text:"Khu vực tạo nhân vật, sân khấu"}
 ]
 
-/* RANDOM ORDER */
+/* RANDOM */
 
-function shuffle(array) {
+function shuffle(a){
 
-  for (let i = array.length - 1; i > 0; i--) {
+for(let i=a.length-1;i>0;i--){
 
-    let j = Math.floor(Math.random() * (i + 1));
+let j=Math.floor(Math.random()*(i+1))
 
-    let temp = array[i];
-    array[i] = array[j];
-    array[j] = temp;
+let temp=a[i]
+a[i]=a[j]
+a[j]=temp
 
-  }
+}
 
 }
 
 shuffle(commands)
 
-/* GAME STATE */
+/* STATE */
 
 let index=0
 let score=0
-let timeLeft=25
+let timeLeft=15
 let timerInterval=null
 let gameStarted=false
+
+/* DOM */
 
 const commandText=document.getElementById("command")
 const scoreText=document.getElementById("score")
 const result=document.getElementById("result")
 const timerText=document.getElementById("timer")
+const timerBox=document.querySelector(".timer")
+const startBtn=document.getElementById("startBtn")
+const skipBtn=document.getElementById("skipBtn")
+const restartBtn=document.getElementById("restartBtn")
+
+timerBox.style.display="none"
+skipBtn.style.display="none"
 
 /* TIMER */
 
@@ -298,9 +347,14 @@ if(timeLeft<=0){
 
 clearInterval(timerInterval)
 
-index++
+let correct=document.getElementById(commands[index].card)
 
-setTimeout(nextCommand,300)
+if(correct && !correct.classList.contains("done")){
+correct.classList.add("flipped","wrong","done")
+}
+
+index++
+setTimeout(nextCommand,800)
 
 }
 
@@ -308,52 +362,68 @@ setTimeout(nextCommand,300)
 
 }
 
-// Thêm xử lý nút Start
+/* START */
 
-const startBtn=document.getElementById("startBtn")
-
-startBtn.addEventListener("click",()=>{
+startBtn.onclick=()=>{
 
 if(gameStarted) return
 
 gameStarted=true
 
 startBtn.style.display="none"
+skipBtn.style.display="block"
+timerBox.style.display="block"
 
 nextCommand()
 
-})
+}
 
-// Chặn click khi chưa Start
+/* CARD CLICK */
 
 document.querySelectorAll(".card").forEach(card=>{
 
-card.addEventListener("click",()=>{
+card.onclick=()=>{
 
 if(!gameStarted) return
-
 if(card.classList.contains("done")) return
 
 clearInterval(timerInterval)
 
-card.classList.add("flipped")
-card.classList.add("done")
+card.classList.add("flipped","done")
 
 if(card.id===commands[index].card){
 score+=10
+}else{
+card.classList.add("wrong")
 }
 
 scoreText.innerText=score
 
 index++
-
 setTimeout(nextCommand,800)
 
-})
+}
 
 })
 
-/* NEXT QUESTION */
+/* SKIP */
+
+skipBtn.onclick=()=>{
+
+if(!gameStarted) return
+
+clearInterval(timerInterval)
+
+let correct=document.getElementById(commands[index].card)
+
+correct.classList.add("flipped","skip","done")
+
+index++
+setTimeout(nextCommand,800)
+
+}
+
+/* NEXT */
 
 function nextCommand(){
 
@@ -373,27 +443,35 @@ startTimer()
 
 function finishGame(){
 
+gameStarted=false
+
+skipBtn.style.display="none"
+timerBox.style.display="none"
+restartBtn.style.display="block"
+
+document.querySelectorAll(".card").forEach(card=>{
+if(!card.classList.contains("done")){
+card.classList.add("flipped","wrong","done")
+}
+})
+
 commandText.innerHTML="🎉 Chúc mừng bạn đã hoàn thành trò chơi!"
 result.innerHTML="Điểm của bạn: "+score
 
 if(score>=80){
-
 result.innerHTML+="<br>🌟 Xuất sắc! Bạn hiểu Scratch rất tốt!"
 setInterval(createHeart,300)
-
-}else if(score>=50){
-
+}
+else if(score>=50){
 result.innerHTML+="<br>👍 Rất tốt! Bạn đã nắm được nhiều kiến thức."
-
-}else{
-
+}
+else{
 result.innerHTML+="<br>💪 Hãy cố gắng thêm nhé!"
-
 }
 
 }
 
-/* HEART EFFECT */
+/* HEART */
 
 function createHeart(){
 
@@ -408,34 +486,36 @@ setTimeout(()=>heart.remove(),4000)
 
 }
 
-/* CLICK */
+/* RESET */
 
-document.querySelectorAll(".card").forEach(card=>{
-
-card.addEventListener("click",()=>{
-
-if(card.classList.contains("done")) return
+function resetGame(){
 
 clearInterval(timerInterval)
 
-card.classList.add("flipped")
-card.classList.add("done")
+index=0
+score=0
+timeLeft=15
+gameStarted=false
 
-if(card.id===commands[index].card){
-score+=10
+scoreText.innerText=0
+timerText.innerText=15
+result.innerHTML=""
+commandText.innerHTML=""
+
+shuffle(commands)
+
+document.querySelectorAll(".card").forEach(card=>{
+card.classList.remove("flipped","done","wrong","skip")
+})
+
+startBtn.style.display="block"
+skipBtn.style.display="none"
+restartBtn.style.display="none"
+timerBox.style.display="none"
+
 }
 
-scoreText.innerText=score
-
-index++
-
-setTimeout(nextCommand,800)
-
-})
-
-})
-
-// nextCommand()
+restartBtn.onclick=resetGame
 </script>
 
 </body>
